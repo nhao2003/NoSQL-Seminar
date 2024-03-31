@@ -1,9 +1,7 @@
 const { MongoClient } = require("mongodb");
 const path = require("path");
 const fs = require("fs");
-const { exit } = require("process");
 const url = "mongodb://localhost:27017";
-const json = require("big-json");
 const dbName = "nosql";
 
 const client = new MongoClient(url);

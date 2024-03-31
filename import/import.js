@@ -17,14 +17,18 @@ async function connect() {
 
 async function clearData() {
   console.log("Clear Prisma data");
-  await prisma.schoolCourse.deleteMany();
-  await prisma.schoolTeacher.deleteMany();
-  await prisma.teacherCourse.deleteMany();
-  await prisma.userCourse.deleteMany();
-  await prisma.user.deleteMany();
-  await prisma.course.deleteMany();
-  await prisma.teacher.deleteMany();
-  await prisma.school.deleteMany();
+  await Promise.all([
+    prisma.schoolCourse.deleteMany(),
+    prisma.schoolTeacher.deleteMany(),
+    prisma.teacherCourse.deleteMany(),
+    prisma.userCourse.deleteMany(),
+  ]);
+  await Promise.all([
+    prisma.user.deleteMany(),
+    prisma.course.deleteMany(),
+    prisma.teacher.deleteMany(),
+    prisma.school.deleteMany(),
+  ]);
   console.log("Clear MongoDB data");
   await mongo.db(dbName).dropDatabase();
 }

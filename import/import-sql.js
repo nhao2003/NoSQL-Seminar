@@ -10,6 +10,8 @@ async function clearData() {
     prisma.schoolTeacher.deleteMany(),
     prisma.teacherCourse.deleteMany(),
     prisma.userCourse.deleteMany(),
+  ]);
+  await Promise.all([
     prisma.user.deleteMany(),
     prisma.course.deleteMany(),
     prisma.teacher.deleteMany(),
