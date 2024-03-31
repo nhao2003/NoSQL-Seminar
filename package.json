@@ -1,0 +1,21 @@
+{
+  "name": "mooccube",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "import": "node ./import/import-nosql.js && node ./import/import-sql.js",
+    "import:nosql": "node ./import/import-nosql.js",
+    "import:sql": "node ./import/import-sql.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.11.0",
+    "mongodb": "^6.5.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.11.0"
+  }
+}
