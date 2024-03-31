@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(cuid()) @map("_id")
+  name        String
+  course_order String[]
+  enroll_time DateTime[]
+  UserCourse  UserCourse[]
+
+  @@map("users")
+}
+
+model Course {
+  id            String          @id @default(cuid()) @map("_id")
+  name          String
+  prerequisites String
+  about         String
+  core_id       String
+  SchoolCourse  SchoolCourse[]
+  TeacherCourse TeacherCourse[]
+  UserCourse    UserCourse[]
+
+  @@map("courses")
+}
+
+model School {
+  id    String @id @default(cuid()) @map("_id")
+  name  String
+  about String
+
+  SchoolCourse  SchoolCourse[]
+  SchoolTeacher SchoolTeacher[]
+
+  @@map("schools")
+}
+
+model Teacher {
+  id            String          @id @default(cuid()) @map("_id")
+  name          String
+  about         String
+  TeacherCourse TeacherCourse[]
+  SchoolTeacher SchoolTeacher[]
+
+  @@map("teachers")
+}
+
+model SchoolCourse {
+  school_id String
+  course_id String
+  School    School? @relation(fields: [school_id], references: [id])
+  Course    Course? @relation(fields: [course_id], references: [id])
+
+  @@id([school_id, course_id])
+  @@map("school_course")
+}
+
+model TeacherCourse {
+  teacher_id String
+  course_id  String
+  Teacher    Teacher? @relation(fields: [teacher_id], references: [id])
+  Course     Course?  @relation(fields: [course_id], references: [id])
+
+  @@id([teacher_id, course_id])
+  @@map("teacher_course")
+}
+
+model UserCourse {
+  user_id   String
+  course_id String
+  User      User?   @relation(fields: [user_id], references: [id])
+  Course    Course? @relation(fields: [course_id], references: [id])
+
+  @@id([user_id, course_id])
+  @@map("user_course")
+}
+
+model SchoolTeacher {
+  school_id  String
+  teacher_id String
+  School     School?  @relation(fields: [school_id], references: [id])
+  Teacher    Teacher? @relation(fields: [teacher_id], references: [id])
+
+  @@id([school_id, teacher_id])
+  @@map("school_teacher")
+}
