@@ -8,8 +8,11 @@ const addOneCourse = async (db) => {
       about: "Test",
     });
     const end = new Date();
-    console.log("Add one course: ", end - start, "ms");
-    return newCourse.insertedId;
+    // console.log("Add one course: ", end - start, " ms");
+    return {
+      time: end - start + " ms",
+      data: newCourse,
+    };
   } catch (error) {
     console.log(error);
   }
@@ -18,9 +21,13 @@ const addOneCourse = async (db) => {
 const getOneCourse = async (db, courseId) => {
   try {
     const start = new Date();
-    await db.collection("courses").findOne({ _id: courseId });
+    const data = await db.collection("courses").findOne({ _id: courseId });
     const end = new Date();
-    console.log("Get one course: ", end - start, "ms");
+    // console.log("Get one course: ", end - start, " ms");
+    return {
+      time: end - start + " ms",
+      data,
+    };
   } catch (error) {
     console.log(error);
   }
@@ -29,7 +36,7 @@ const getOneCourse = async (db, courseId) => {
 const updateOneCourse = async (db, courseId) => {
   try {
     const start = new Date();
-    await db.collection("courses").updateOne(
+    const data = await db.collection("courses").updateOne(
       { _id: courseId },
       {
         $set: {
@@ -39,7 +46,11 @@ const updateOneCourse = async (db, courseId) => {
       }
     );
     const end = new Date();
-    console.log("Update one course: ", end - start, "ms");
+    // console.log("Update one course: ", end - start, " ms");
+    return {
+      time: end - start + " ms",
+      data,
+    };
   } catch (error) {
     console.log(error);
   }
@@ -50,7 +61,11 @@ const deleteOneCourse = async (db, courseId) => {
     const start = new Date();
     await db.collection("courses").deleteOne({ _id: courseId });
     const end = new Date();
-    console.log("Delete one course: ", end - start, "ms");
+    // console.log("Delete one course: ", end - start, " ms");
+    return {
+      time: end - start + " ms",
+      data: courseId,
+    };
   } catch (error) {
     console.log(error);
   }
@@ -61,7 +76,11 @@ const getAllSchools = async (db) => {
     const start = new Date();
     const allSchools = await db.collection("schools").find().toArray();
     const end = new Date();
-    console.log("Get all schools: ", end - start, "ms");
+    // console.log("Get all schools: ", end - start, " ms");
+    return {
+      time: end - start + " ms",
+      data: allSchools,
+    };
   } catch (error) {
     console.log(error);
   }
@@ -77,11 +96,15 @@ const getAllCoursesUserEnrolled = async (db, userId) => {
       .toArray();
     //console.log(courses);
     const end = new Date();
-    console.log(
-      "List all courses a specific user is enrolled in: ",
-      end - start,
-      "ms"
-    );
+    // console.log(
+    //   "List all courses a specific user is enrolled in: ",
+    //   end - start,
+    //   " ms"
+    // );
+    return {
+      time: end - start + " ms",
+      data: courses,
+    };
   } catch (error) {
     console.log(error);
   }
@@ -128,11 +151,15 @@ const getUserInSpecificCourse = async (db, courseId, timeStart, timeEnd) => {
       .toArray();
     //console.log(users);
     const end = new Date();
-    console.log(
-      "Get users who enrolled in a specific course during a given time range: ",
-      end - start,
-      "ms"
-    );
+    // console.log(
+    //   "Get users who enrolled in a specific course during a given time range: ",
+    //   end - start,
+    //   " ms"
+    // );
+    return {
+      time: end - start + " ms",
+      data: users,
+    };
   } catch (error) {
     console.log(error);
   }
@@ -169,11 +196,15 @@ const getTeachersOfCourse = async (db, courseId) => {
       .toArray();
     const end = new Date();
     //console.log(teachers);
-    console.log(
-      "List of teachers for a particular course: ",
-      end - start,
-      "ms"
-    );
+    // console.log(
+    //   "List of teachers for a particular course: ",
+    //   end - start,
+    //   " ms"
+    // );
+    return {
+      time: end - start + " ms",
+      data: teachers,
+    };
   } catch (error) {
     console.log(error);
   }
@@ -211,11 +242,15 @@ const getCourseOfferedBySchool = async (db, schoolId) => {
       .toArray();
     //console.log(courses.length);
     const end = new Date();
-    console.log(
-      "List Courses offered by a particular school: ",
-      end - start,
-      "ms"
-    );
+    // console.log(
+    //   "List Courses offered by a particular school: ",
+    //   end - start,
+    //   " ms"
+    // );
+    return {
+      time: end - start + " ms",
+      data: courses,
+    };
   } catch (error) {
     console.log(error);
   }
@@ -238,11 +273,15 @@ const addCourseToUser = async (db, courseId, userId) => {
       }
     );
     const end = new Date();
-    console.log(
-      "Add a specific course to a user's enrollment list: ",
-      end - start,
-      "ms"
-    );
+    // console.log(
+    //   "Add a specific course to a user's enrollment list: ",
+    //   end - start,
+    //   " ms"
+    // );
+    return {
+      time: end - start + " ms",
+      data,
+    };
   } catch (error) {
     console.log(error);
   }
@@ -260,11 +299,15 @@ const getCountCourseOfTeacher = async (db, teacherId) => {
       .toArray();
     const end = new Date();
     //console.log(data);
-    console.log(
-      "Get the count of courses a specific teacher teach: ",
-      end - start,
-      "ms"
-    );
+    // console.log(
+    //   "Get the count of courses a specific teacher teach: ",
+    //   end - start,
+    //   " ms"
+    // );
+    return {
+      time: end - start + " ms",
+      data,
+    };
   } catch (error) {
     console.log(error);
   }
@@ -342,11 +385,15 @@ const get5MostEnrolledCourses = async (db) => {
       .toArray();
     const end = new Date();
     //console.log(top5Courses);
-    console.log(
-      "List the top 5 most enrolled courses during the current month: ",
-      end - start,
-      "ms"
-    );
+    // console.log(
+    //   "List the top 5 most enrolled courses during the current month: ",
+    //   end - start,
+    //   " ms"
+    // );
+    return {
+      time: end - start + " ms",
+      data: top5Courses,
+    };
   } catch (error) {
     console.log(error);
   }
@@ -384,8 +431,12 @@ const getMostPopularCourseOfSchool = async (db, schoolId) => {
     console.log(
       "Find the most popular course within a specific school: ",
       end - start,
-      "ms"
+      " ms"
     );
+    return {
+      time: end - start + " ms",
+      data: mostPopularCourse,
+    };
   } catch (error) {
     console.log(error);
   }
@@ -437,38 +488,105 @@ const findMonthlyEnrollmentTrends = async (db) => {
     console.log(
       "Find Monthly enrollment trends over a year: ",
       end - start,
-      "ms"
+      " ms"
     );
-    return monthlyEnrollments;
+    // return monthlyEnrollments;
+    return {
+      time: end - start + " ms",
+      data: monthlyEnrollments,
+    };
   } catch (error) {
     console.log(error);
     return [];
   }
 };
+// await getAllSchools(db);
+// await getAllCoursesUserEnrolled(db, "U_7001215");
+// await getUserInSpecificCourse(
+//   db,
+//   "C_course-v1:TsinghuaX+00740043_2x_2015_T2+sp",
+//   "2017-04-26T04:09:21.000Z",
+//   "2017-05-3T04:09:21.000Z"
+// );
+// await getTeachersOfCourse(db, "C_course-v1:TsinghuaX+00740043_2x_2015_T2+sp");
+// await getCourseOfferedBySchool(db, "S_BNU");
+// await addCourseToUser(
+//   db,
+//   "C_course-v1:McGillX+ATOC185x+2015_T1",
+//   "U_7001215"
+// );
+// await getCountCourseOfTeacher(db, "T_方维奇");
+// await get5MostEnrolledCourses(db);
+// await getMostPopularCourseOfSchool(db, "S_BNU");
+// await findMonthlyEnrollmentTrends(db);
+class MongGoDemo {
+  constructor(db) {
+    this.db = db;
+  }
 
-const mongoCRUD = async (db) => {
-  const newCourseId = await addOneCourse(db);
-  await getOneCourse(db, newCourseId);
-  await updateOneCourse(db, newCourseId);
-  await deleteOneCourse(db, newCourseId);
-  await getAllSchools(db);
-  await getAllCoursesUserEnrolled(db, "U_7001215");
-  await getUserInSpecificCourse(
-    db,
-    "C_course-v1:TsinghuaX+00740043_2x_2015_T2+sp",
-    "2017-04-26T04:09:21.000Z",
-    "2017-05-3T04:09:21.000Z"
-  );
-  await getTeachersOfCourse(db, "C_course-v1:TsinghuaX+00740043_2x_2015_T2+sp");
-  await getCourseOfferedBySchool(db, "S_BNU");
-  await addCourseToUser(
-    db,
-    "C_course-v1:McGillX+ATOC185x+2015_T1",
-    "U_7001215"
-  );
-  await getCountCourseOfTeacher(db, "T_方维奇");
-  await get5MostEnrolledCourses(db);
-  await getMostPopularCourseOfSchool(db, "S_BNU");
-  await findMonthlyEnrollmentTrends(db);
-};
-module.exports = mongoCRUD;
+  async demoCRUD() {
+    const data = await addOneCourse(this.db);
+    console.log("Add one course: ", data.time);
+    const newCourseId = data.data.insertedId;
+    const getOneCourseData = await getOneCourse(this.db, newCourseId);
+    console.log("Get one course: ", getOneCourseData.time);
+    const updateOneCourseData = await updateOneCourse(this.db, newCourseId);
+    console.log("Update one course: ", updateOneCourseData.time);
+    const deleteOneCourseData = await deleteOneCourse(this.db, newCourseId);
+    console.log("Delete one course: ", deleteOneCourseData.time);
+  }
+
+  async getAllSchools() {
+    return await getAllSchools(this.db);
+  }
+
+  async getAllCoursesUserEnrolled() {
+    return await getAllCoursesUserEnrolled(this.db, "U_7001215");
+  }
+
+  async getUserInSpecificCourse() {
+    return await getUserInSpecificCourse(
+      this.db,
+      "C_course-v1:TsinghuaX+00740043_2x_2015_T2+sp",
+      "2017-04-26T04:09:21.000Z",
+      "2017-05-3T04:09:21.000Z"
+    );
+  }
+
+  async getTeachersOfCourse() {
+    return await getTeachersOfCourse(
+      this.db,
+      "C_course-v1:TsinghuaX+00740043_2x_2015_T2+sp"
+    );
+  }
+
+  async getCourseOfferedBySchool() {
+    return await getCourseOfferedBySchool(this.db, "S_BNU");
+  }
+
+  async addCourseToUser() {
+    return await addCourseToUser(
+      this.db,
+      "C_course-v1:McGillX+ATOC185x+2015_T1",
+      "U_7001215"
+    );
+  }
+
+  async getCountCourseOfTeacher() {
+    return await getCountCourseOfTeacher(this.db, "T_方维奇");
+  }
+
+  async get5MostEnrolledCourses() {
+    return await get5MostEnrolledCourses(this.db);
+  }
+
+  async getMostPopularCourseOfSchool() {
+    return await getMostPopularCourseOfSchool(this.db, "S_BNU");
+  }
+
+  async findMonthlyEnrollmentTrends() {
+    return await findMonthlyEnrollmentTrends(this.db);
+  }
+}
+
+module.exports = MongGoDemo;

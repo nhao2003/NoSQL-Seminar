@@ -35,7 +35,12 @@ async function clearData() {
 // Tính thời gian chạy
 async function importData(type, func, tableName) {
   const start = new Date();
-  await func;
+  try {
+    await func;
+  } catch (error) {
+    console.log("Error: ", tableName);
+    return;
+  }
   const end = new Date();
   return {
     type,
@@ -45,29 +50,26 @@ async function importData(type, func, tableName) {
 }
 
 async function importPostgresData(entityName, entityJson) {
-  for (let i = 0; i < entityJson.length; i++) {
-    const entity = entityJson[i];
-    const id = entity._id;
-    delete entity._id;
-    entity.id = id;
-  }
-
-  if (entityName === "users") {
-    await prisma.user.createMany({ data: entityJson });
-  } else if (entityName === "courses") {
-    await prisma.course.createMany({ data: entityJson });
-  } else if (entityName === "teachers") {
-    await prisma.teacher.createMany({ data: entityJson });
-  } else if (entityName === "schools") {
-    await prisma.school.createMany({ data: entityJson });
-  } else if (entityName === "user-course") {
-    await prisma.userCourse.createMany({ data: entityJson });
-  } else if (entityName === "teacher-course") {
-    await prisma.teacherCourse.createMany({ data: entityJson });
-  } else if (entityName === "school-teacher") {
-    await prisma.schoolTeacher.createMany({ data: entityJson });
-  } else if (entityName === "school-course") {
-    await prisma.schoolCourse.createMany({ data: entityJson });
+  try {
+    if (entityName === "users") {
+      await prisma.user.createMany({ data: entityJson });
+    } else if (entityName === "courses") {
+      await prisma.course.createMany({ data: entityJson });
+    } else if (entityName === "teachers") {
+      await prisma.teacher.createMany({ data: entityJson });
+    } else if (entityName === "schools") {
+      await prisma.school.createMany({ data: entityJson });
+    } else if (entityName === "user-course") {
+      await prisma.userCourse.createMany({ data: entityJson });
+    } else if (entityName === "teacher-course") {
+      await prisma.teacherCourse.createMany({ data: entityJson });
+    } else if (entityName === "school-teacher") {
+      await prisma.schoolTeacher.createMany({ data: entityJson });
+    } else if (entityName === "school-course") {
+      await prisma.schoolCourse.createMany({ data: entityJson });
+    }
+  } catch (error) {
+    console.log("Error: ", entityName);
   }
 }
 // Use connect method to connect to the server
@@ -82,56 +84,57 @@ async function main() {
   for (let i = 0; i < entities.length; i++) {
     const entity = entities[i];
     const entityData = fs.readFileSync(path.join(entityPath, entity), "utf8");
-    const entityJson = JSON.parse(entityData);
     const entityName = entity.replace(".json", "");
-    arr.push(
-      await Promise.all([
-        importData(
-          "MongoDB",
-          db.collection(entityName).insertMany(entityJson),
-          entityName
-        ),
-        importData(
-          "Prisma",
-          importPostgresData(entityName, entityJson),
-          entityName
-        ),
-      ])
-    );
+    const mongoEntityJson = JSON.parse(entityData);
+    const entityJson = JSON.parse(entityData).map((entity) => {
+      const id = entity._id;
+      delete entity._id;
+      entity.id = id;
+      return entity;
+    });
+    const res = await Promise.all([
+      importData(
+        "MongoDB",
+        db.collection(entityName).insertMany(mongoEntityJson),
+        entityName
+      ),
+      importData(
+        "Prisma",
+        importPostgresData(entityName, entityJson),
+        entityName
+      ),
+    ]);
+    arr.push(...res);
+    console.log("Import " + entityName + " successfully");
   }
-  for (let i = 0; i < arr.length; i++) {
+  for (let i = 0; i < relations.length; i++) {
     const relation = relations[i];
     const relationData = fs.readFileSync(
       path.join(relationsPath, relation),
       "utf8"
     );
-    const relationJson = JSON.parse(relationData);
     const relationName = relation.replace(".json", "");
-    arr.push(
-      await Promise.all([
-        importData(
-          "MongoDB",
-          //   db.collection(relationName).insertMany(relationJson),
-          (async () => {
-            await db.collection(relationName).insertMany(relationJson);
-            return true;
-          })(),
-          relationName
-        ),
-        importData(
-          "Prisma",
-          // importPostgresData(relationName, relationJson),
-          (async () => {
-            await importPostgresData(relationName, relationJson);
-            return true;
-          })(),
-          relationName
-        ),
-      ])
-    );
+    const mongoRelationJson = JSON.parse(relationData);
+    const prismaRelationJson = JSON.parse(relationData);
+    const res = await Promise.all([
+      importData(
+        "MongoDB",
+        db.collection(relationName).insertMany(mongoRelationJson),
+        relationName
+      ),
+      importData(
+        "Prisma",
+        importPostgresData(relationName, prismaRelationJson),
+        relationName
+      ),
+    ]);
+    arr.push(...res);
+    console.log("Import " + relationName + " successfully");
   }
-  console.log("Import data successfully");
-  console.table(arr.flat());
+  arr.sort((a, b) => (a.type > b.type ? 1 : -1));
+  console.table(arr);
+  await prisma.$disconnect();
+  await mongo.close();
 }
 
 main().catch(console.error);
