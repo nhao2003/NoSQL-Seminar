@@ -14,12 +14,9 @@ async function main() {
 
   const db = client.db(dbName);
   const mongoDemo = new MongGoDemo(db);
-  await mongoDemo.demoCRUD();
-  const data = await mongoDemo.get5MostEnrolledCourses();
-  console.log(data.data);
-  const allSchools = await mongoDemo.getAllSchools();
-  console.log(allSchools.time);
-  console.log(allSchools.data.length);
+  // await mongoDemo.demoCRUD();
+  const data = await mongoDemo.getTheMostPopularCourseOfSchool();
+  console.log(data);
   await client.close();
   await prisma.$disconnect();
 }
