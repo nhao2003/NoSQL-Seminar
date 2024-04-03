@@ -8,7 +8,8 @@
     "import": "node ./import/import-nosql.js && node ./import/import-sql.js",
     "import:nosql": "node ./import/import-nosql.js",
     "import:sql": "node ./import/import-sql.js",
-    "start": "node ./src/index.js"
+    "start": "node ./src/index.js",
+    "temp": "node ./src/temp.js"
   },
   "author": "",
   "license": "ISC",
