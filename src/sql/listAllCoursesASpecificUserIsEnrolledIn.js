@@ -13,7 +13,7 @@ module.exports = async (prisma, userId) => {
   const prismaEnd = new Date();
 
   return {
-    time: `${prismaEnd - prismaStart}ms`,
-    enrolledCourses: enrolledCourses.UserCourse,
+    time: `${prismaEnd - prismaStart} ms`,
+    data: enrolledCourses.UserCourse,
   };
 };

@@ -18,7 +18,7 @@ module.exports = async (prisma, schoolId) => {
   const end = new Date();
 
   return {
-    time: `${end - start}ms`,
+    time: `${end - start} ms`,
     data: results,
   };
 };

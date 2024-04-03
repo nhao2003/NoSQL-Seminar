@@ -12,7 +12,7 @@ module.exports = async (prisma, year) => {
   const end = new Date();
 
   return {
-    time: `${end - start}ms`,
+    time: `${end - start} ms`,
     data: monthlyEnrollmentTrends,
   };
 };

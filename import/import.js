@@ -114,7 +114,13 @@ async function main() {
       "utf8"
     );
     const relationName = relation.replace(".json", "");
-    const mongoRelationJson = JSON.parse(relationData);
+    let mongoRelationJson = JSON.parse(relationData);
+    if (relationName === "user_course") {
+      mongoRelationJson = mongoRelationJson.map((relation) => {
+        relation.enroll_time = new Date(relation.enroll_time);
+        return relation;
+      });
+    }
     const prismaRelationJson = JSON.parse(relationData);
     const res = await Promise.all([
       importData(

@@ -6,7 +6,7 @@ module.exports = async (prisma, teacherId) => {
   const end = new Date();
 
   return {
-    time: `${end - start}ms`,
+    time: `${end - start} ms`,
     data: courseCount,
   };
 };

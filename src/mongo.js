@@ -125,58 +125,59 @@ const getAllCoursesUserEnrolled = async (db, userId) => {
   }
 };
 //Get users who enrolled in a specific course during a given time range.
-const getUserInSpecificCourse = async (db, courseId) => {
-  // User:
-  // {
-  //   "_id": "U_7001215",
-  //   "name": "Patrick Parker"
-  // },
-
-  // user_course:
-  // {
-  //   "user_id": "U_7001215",
-  //   "course_id": "C_course-v1:TsinghuaX+00740043_2x_2015_T2+sp"
-  // }
-
-  // courses:
-  // {
-  //   "_id": "C_course-v1:TsinghuaX+00740043_2x_2015_T2+sp",
-  //   "name": "Test",
-  //   "prerequisites": "Test",
-  //   "about": "Test"
-  // }
+const getUserInSpecificCourse = async (db, courseId, startDate, endDate) => {
   try {
     const start = new Date();
-    const users = await db.collection("user_course").aggregate([
-      {
-        $match: { course_id: courseId },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "user_id",
-          foreignField: "_id",
-          as: "users",
+    const users = await db
+      .collection("user_course")
+      .aggregate([
+        {
+          $match: {
+            course_id: "C_course-v1:ACCA+FA1_X_en+2019_T1",
+            enroll_time: {
+              $gte: new Date(startDate),
+              $lte: new Date(endDate),
+            },
+          },
         },
-      },
-      {
-        $unwind: "$users",
-      },
-      {
-        $project: {
-          _id: "$users._id",
-          name: "$users.name",
+        {
+          $lookup: {
+            from: "users",
+            localField: "user_id",
+            foreignField: "_id",
+            as: "user",
+          },
         },
-      },
-    ]);
+        {
+          $unwind: "$user",
+        },
+        {
+          $group: {
+            _id: "$user._id",
+            name: {
+              $first: "$user.name",
+            },
+            enroll_time: {
+              $first: "$enroll_time",
+            },
+            user_id: {
+              $first: "$user_id",
+            },
+            course_id: {
+              $first: "$course_id",
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+          },
+        },
+      ])
+      .toArray();
 
-    //console.log(users);
     const end = new Date();
-    // console.log(
-    //   "Get users who enrolled in a specific course during a given time range: ",
-    //   end - start,
-    //   " ms"
-    // );
     return {
       time: end - start + " ms",
       data: users,
@@ -235,7 +236,7 @@ const getCourseOfferedBySchool = async (db, schoolId) => {
   try {
     const start = new Date();
     const courses = await db
-      .collection("school-course")
+      .collection("school_course")
       .aggregate([
         {
           $match: { school_id: schoolId },
@@ -363,44 +364,62 @@ function getCurrentMonthRange() {
     endOfMonth: formattedLastDayOfMonth,
   };
 }
-const get5MostEnrolledCourses = async (db) => {
+const get5MostEnrolledCourses = async (db, month, year) => {
   try {
-    const { startOfMonth, endOfMonth } = getCurrentMonthRange();
     const start = new Date();
     const top5Courses = await db
-      .collection("users")
+      .collection("user_course")
       .aggregate([
         {
-          $unwind: {
-            path: "$course_order",
-            includeArrayIndex: "index",
-          },
-        },
-        {
-          $project: {
-            course_id: "$course_order",
-            enroll_time: { $arrayElemAt: ["$enroll_time", "$index"] },
-          },
-        },
-        {
           $match: {
-            enroll_time: {
-              $gte: startOfMonth,
-              $lte: endOfMonth,
+            $expr: {
+              $and: [
+                {
+                  $eq: [
+                    {
+                      $month: {
+                        $toDate: "$enroll_time",
+                      },
+                    },
+                    month,
+                  ],
+                },
+                {
+                  $eq: [
+                    {
+                      $year: {
+                        $toDate: "$enroll_time",
+                      },
+                    },
+                    year,
+                  ],
+                },
+              ],
             },
           },
         },
         {
           $group: {
             _id: "$course_id",
-            count: { $sum: 1 },
+            enrollments: {
+              $sum: 1,
+            },
           },
         },
         {
-          $sort: { count: -1 },
+          $sort: {
+            enrollments: -1,
+          },
         },
         {
           $limit: 5,
+        },
+        {
+          $project: {
+            _id: 0,
+            course_id: "$_id",
+            enrollments: 1,
+          },
         },
       ])
       .toArray();
@@ -413,7 +432,6 @@ const get5MostEnrolledCourses = async (db) => {
     console.log(error);
   }
 };
-//Find the most popular course within a specific school
 const getTheMostPopularCourseOfSchool = async (db, schoolId) => {
   try {
     const start = new Date();
@@ -421,68 +439,68 @@ const getTheMostPopularCourseOfSchool = async (db, schoolId) => {
       .collection("schools")
       .aggregate([
         {
-            $match: { "_id": "S_ACCA" } // Filtering based on school_id
+          $match: { _id: "S_ACCA" }, // Filtering based on school_id
         },
         {
-            $lookup: {
-                from: "school_course",
-                localField: "_id",
-                foreignField: "school_id",
-                as: "school_courses"
-            }
+          $lookup: {
+            from: "school_course",
+            localField: "_id",
+            foreignField: "school_id",
+            as: "school_courses",
+          },
         },
         {
-            $unwind: "$school_courses" // Denormalizing school_courses array
+          $unwind: "$school_courses", // Denormalizing school_courses array
         },
         {
-            $lookup: {
-                from: "user_course",
-                localField: "school_courses.course_id",
-                foreignField: "course_id",
-                as: "user_courses"
-            }
+          $lookup: {
+            from: "user_course",
+            localField: "school_courses.course_id",
+            foreignField: "course_id",
+            as: "user_courses",
+          },
         },
         {
-            $unwind: "$user_courses" // Denormalizing user_courses array
+          $unwind: "$user_courses", // Denormalizing user_courses array
         },
         {
-            $lookup: {
-                from: "courses",
-                localField: "school_courses.course_id",
-                foreignField: "_id",
-                as: "courses"
-            }
+          $lookup: {
+            from: "courses",
+            localField: "school_courses.course_id",
+            foreignField: "_id",
+            as: "courses",
+          },
         },
         {
-            $unwind: "$courses" // Denormalizing courses array
+          $unwind: "$courses", // Denormalizing courses array
         },
         {
-            $group: {
-                _id: {
-                    school_name: "$name", // Grouping by school_name and course_name
-                    course_name: "$courses.name"
-                },
-                enrollment_count: { $sum: 1 } // Counting enrollments
-            }
+          $group: {
+            _id: {
+              school_name: "$name", // Grouping by school_name and course_name
+              course_name: "$courses.name",
+            },
+            enrollment_count: { $sum: 1 }, // Counting enrollments
+          },
         },
         {
-            $sort: {
-                "_id.school_name": 1,
-                "enrollment_count": -1 // Sorting by school_name and enrollment_count in descending order
-            }
+          $sort: {
+            "_id.school_name": 1,
+            enrollment_count: -1, // Sorting by school_name and enrollment_count in descending order
+          },
         },
         {
-            $limit: 1 // Limiting the result to one document
+          $limit: 1, // Limiting the result to one document
         },
         {
-            $project: {
-                _id: 0,
-                school_name: "$_id.school_name",
-                course_name: "$_id.course_name",
-                enrollment_count: 1 // Projecting required fields
-            }
-        }
-    ])
+          $project: {
+            _id: 0,
+            school_name: "$_id.school_name",
+            course_name: "$_id.course_name",
+            enrollment_count: 1, // Projecting required fields
+          },
+        },
+      ])
       .toArray();
     const end = new Date();
     return {
@@ -532,72 +550,91 @@ const findMonthlyEnrollmentTrends = async (db) => {
     return [];
   }
 };
-class MongGoDemo {
-  constructor(db) {
-    this.db = db;
-  }
+// class MongGoDemo {
+//   constructor(db) {
+//     this.db = db;
+//   }
 
-  async demoCRUD() {
-    const data = await addOneCourse(this.db);
-    console.log("Add one course: ", data.time);
-    const newCourseId = data.data.insertedId;
-    const getOneCourseData = await getOneCourse(this.db, newCourseId);
-    console.log("Get one course: ", getOneCourseData.time);
-    const updateOneCourseData = await updateOneCourse(this.db, newCourseId);
-    console.log("Update one course: ", updateOneCourseData.time);
-    const deleteOneCourseData = await deleteOneCourse(this.db, newCourseId);
-    console.log("Delete one course: ", deleteOneCourseData.time);
-  }
+//   async demoCRUD() {
+//     const data = await addOneCourse(this.db);
+//     console.log("Add one course: ", data.time);
+//     const newCourseId = data.data.insertedId;
+//     const getOneCourseData = await getOneCourse(this.db, newCourseId);
+//     console.log("Get one course: ", getOneCourseData.time);
+//     const updateOneCourseData = await updateOneCourse(this.db, newCourseId);
+//     console.log("Update one course: ", updateOneCourseData.time);
+//     const deleteOneCourseData = await deleteOneCourse(this.db, newCourseId);
+//     console.log("Delete one course: ", deleteOneCourseData.time);
+//   }
 
-  async getAllSchools() {
-    return await getAllSchools(this.db);
-  }
+//   async getAllSchools() {
+//     return await getAllSchools(this.db);
+//   }
 
-  async getAllCoursesUserEnrolled() {
-    return await getAllCoursesUserEnrolled(this.db, "U_7001215");
-  }
+//   async getAllCoursesUserEnrolled() {
+//     return await getAllCoursesUserEnrolled(this.db, "U_7001215");
+//   }
 
-  async getUserInSpecificCourse() {
-    return await getUserInSpecificCourse(
-      this.db,
-      "C_course-v1:TsinghuaX+00740043_2x_2015_T2+sp"
-    );
-  }
+//   async getUserInSpecificCourse() {
+//     return await getUserInSpecificCourse(
+//       this.db,
+//       "C_course-v1:TsinghuaX+00740043_2x_2015_T2+sp",
+//       "2019-04-09",
+//       "2019-09-09"
+//     );
+//   }
 
-  async getTeachersOfCourse() {
-    return await getTeachersOfCourse(
-      this.db,
-      "C_course-v1:TsinghuaX+00740043_2x_2015_T2+sp"
-    );
-  }
+//   async getTeachersOfCourse() {
+//     return await getTeachersOfCourse(
+//       this.db,
+//       "C_course-v1:TsinghuaX+00740043_2x_2015_T2+sp"
+//     );
+//   }
 
-  async getCourseOfferedBySchool() {
-    return await getCourseOfferedBySchool(this.db, "S_BNU");
-  }
+//   async getCourseOfferedBySchool() {
+//     return await getCourseOfferedBySchool(this.db, "S_BNU");
+//   }
 
-  async addCourseToUser() {
-    return await addCourseToUser(
-      this.db,
-      "C_course-v1:McGillX+ATOC185x+2015_T1",
-      "U_7001215"
-    );
-  }
+//   async addCourseToUser() {
+//     return await addCourseToUser(
+//       this.db,
+//       "C_course-v1:McGillX+ATOC185x+2015_T1",
+//       "U_7001215"
+//     );
+//   }
 
-  async getCountCourseOfTeacher() {
-    return await getCountCourseOfTeacher(this.db, "T_方维奇");
-  }
+//   async getCountCourseOfTeacher() {
+//     return await getCountCourseOfTeacher(this.db, "T_方维奇");
+//   }
 
-  async get5MostEnrolledCourses() {
-    return await get5MostEnrolledCourses(this.db);
-  }
+//   async get5MostEnrolledCourses() {
+//     return await get5MostEnrolledCourses(this.db);
+//   }
 
-  async getTheMostPopularCourseOfSchool() {
-    return await getTheMostPopularCourseOfSchool(this.db, "S_ACCA");
-  }
+//   async getTheMostPopularCourseOfSchool() {
+//     return await getTheMostPopularCourseOfSchool(this.db, "S_ACCA");
+//   }
 
-  async findMonthlyEnrollmentTrends() {
-    return await findMonthlyEnrollmentTrends(this.db);
-  }
-}
+//   async findMonthlyEnrollmentTrends() {
+//     return await findMonthlyEnrollmentTrends(this.db);
+//   }
+// }
 
-module.exports = MongGoDemo;
+// module.exports = MongGoDemo;
+
+module.exports = {
+  addOneCourse,
+  getOneCourse,
+  updateOneCourse,
+  deleteOneCourse,
+  getAllSchools,
+  getAllCoursesUserEnrolled,
+  getUserInSpecificCourse,
+  getTeachersOfCourse,
+  getCourseOfferedBySchool,
+  addCourseToUser,
+  getCountCourseOfTeacher,
+  get5MostEnrolledCourses,
+  getTheMostPopularCourseOfSchool,
+  findMonthlyEnrollmentTrends,
+};

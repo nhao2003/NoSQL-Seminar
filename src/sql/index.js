@@ -1,0 +1,21 @@
+// const getAllSchools = require("./getAllSchools");
+// const ListAllCoursesASpecificUserIsEnrolledInJS = require("./listAllCoursesASpecificUserIsEnrolledIn.js");
+// const getUsersWhoEnrolledInASpecificCourseDuringAGivenTimeRange = require("./getUsersWhoEnrolledInASpecificCourseDuringAGivenTimeRange");
+// const getAllTeachersForAParticularCourse = require("./getAllTeachersForAParticularCourse.js");
+// const findTheMostPopularCourseWithinASpecificSchool = require("./findTheMostPopularCourseWithinASpecificSchool.js");
+// const findMonthlyEnrollmentTrendsOverAYear = require("./findMonthlyEnrollmentTrendsOverAYear.js");
+// const getTop5MostEnrolledCoursesDuringTheCurrentMonth = require("./getTop5MostEnrolledCoursesDuringTheCurrentMonth.js");
+// const getTheCountOfCoursesASpecificTeacherTeach = require("./getTheCountOfCoursesASpecificTeacherTeach.js");
+// const addASpecificCourseToAUserEnrollmentList = require("./addASpecificCourseToAUserEnrollmentList.js");
+// const getAllCoursesOfferedByAParticularSchool = require("./getAllCoursesOfferedByAParticularSchool.js");
+
+exports.getAllSchools = require("./getAllSchools");
+exports.ListAllCoursesASpecificUserIsEnrolledInJS = require("./listAllCoursesASpecificUserIsEnrolledIn.js");
+exports.getUsersWhoEnrolledInASpecificCourseDuringAGivenTimeRange = require("./getUsersWhoEnrolledInASpecificCourseDuringAGivenTimeRange");
+exports.getAllTeachersForAParticularCourse = require("./getAllTeachersForAParticularCourse.js");
+exports.findTheMostPopularCourseWithinASpecificSchool = require("./findTheMostPopularCourseWithinASpecificSchool.js");
+exports.findMonthlyEnrollmentTrendsOverAYear = require("./findMonthlyEnrollmentTrendsOverAYear.js");
+exports.getTop5MostEnrolledCoursesDuringTheCurrentMonth = require("./getTop5MostEnrolledCoursesDuringTheCurrentMonth.js");
+exports.getTheCountOfCoursesASpecificTeacherTeach = require("./getTheCountOfCoursesASpecificTeacherTeach.js");
+exports.addASpecificCourseToAUserEnrollmentList = require("./addASpecificCourseToAUserEnrollmentList.js");
+exports.getAllCoursesOfferedByAParticularSchool = require("./getAllCoursesOfferedByAParticularSchool.js");

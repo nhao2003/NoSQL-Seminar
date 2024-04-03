@@ -5,5 +5,5 @@ module.exports = async (prisma) => {
 
   const prismaEnd = new Date();
 
-  return { time: `${prismaEnd - prismaStart}ms`, data: schools };
+  return { time: `${prismaEnd - prismaStart} ms`, data: schools };
 };

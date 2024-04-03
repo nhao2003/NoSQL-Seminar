@@ -36,6 +36,11 @@ async function main() {
     );
     const relationJson = JSON.parse(relationData);
     const relationName = relation.replace(".json", "");
+    if (relationName === "user_course") {
+      relationJson.forEach((relation) => {
+        relation.enroll_time = new Date(relation.enroll_time);
+      });
+    }
     promises.push(db.collection(relationName).insertMany(relationJson));
   });
   await Promise.all(promises);

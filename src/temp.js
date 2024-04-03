@@ -37,13 +37,13 @@ async function main() {
 
   // // 2. List all courses a specific user is enrolled in
   // const userId = "U_10000060";
-  // const result2 = await listAllCoursesASpecificUserIsEnrolledInJS(
+  // const result2 = await ListAllCoursesASpecificUserIsEnrolledInJS(
   //   prisma,
   //   userId
   // );
-  // console.log({ result2 });
+  // console.log(result2);
 
-  // // 3. Get users who enrolled in a specific course during a given time range**
+  // 3. Get users who enrolled in a specific course during a given time range**
   // const courseId = "C_course-v1:ACCA+FA1_X_en+2019_T1";
   // const startDate = new Date("2019-04-09");
   // const endDate = new Date("2019-09-09");
@@ -54,7 +54,7 @@ async function main() {
   //     startDate,
   //     endDate
   //   );
-  // console.log({ result3 });
+  // console.log(result3);
 
   // // 4. Get all teachers for a particular course
   // const courseId = "C_course-v1:HUBU+20170227X+2019_T1";
@@ -87,7 +87,7 @@ async function main() {
   // );
   // console.log({ result7 });
 
-  // // 8. Get top 5 most enrolled courses during the current month
+  // 8. Get top 5 most enrolled courses during the current month
   // const month = 7;
   // const year = 2019;
   // const result8 = await getTop5MostEnrolledCoursesDuringTheCurrentMonth(

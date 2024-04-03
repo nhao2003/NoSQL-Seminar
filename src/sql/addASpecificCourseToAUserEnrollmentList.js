@@ -24,7 +24,7 @@ module.exports = async (prisma, userId, courseId) => {
     });
     const prismaEnd = new Date();
     return {
-      time: `${prismaEnd - prismaStart}ms`,
+      time: `${prismaEnd - prismaStart} ms`,
       data: result,
     };
   } else {
