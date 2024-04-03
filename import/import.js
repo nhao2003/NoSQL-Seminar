@@ -59,13 +59,13 @@ async function importPostgresData(entityName, entityJson) {
       await prisma.teacher.createMany({ data: entityJson });
     } else if (entityName === "schools") {
       await prisma.school.createMany({ data: entityJson });
-    } else if (entityName === "user-course") {
+    } else if (entityName === "user_course") {
       await prisma.userCourse.createMany({ data: entityJson });
-    } else if (entityName === "teacher-course") {
+    } else if (entityName === "teacher_course") {
       await prisma.teacherCourse.createMany({ data: entityJson });
-    } else if (entityName === "school-teacher") {
+    } else if (entityName === "school_teacher") {
       await prisma.schoolTeacher.createMany({ data: entityJson });
-    } else if (entityName === "school-course") {
+    } else if (entityName === "school_course") {
       await prisma.schoolCourse.createMany({ data: entityJson });
     }
   } catch (error) {

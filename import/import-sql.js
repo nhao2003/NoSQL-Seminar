@@ -56,17 +56,17 @@ async function main() {
     const relationJson = JSON.parse(relationData);
     const relationName = relation.replace(".json", "");
     switch (relationName) {
-      case "school-course":
+      case "school_course":
         promises.push(prisma.schoolCourse.createMany({ data: relationJson }));
 
         break;
-      case "school-teacher":
+      case "school_teacher":
         promises.push(prisma.schoolTeacher.createMany({ data: relationJson }));
         break;
-      case "teacher-course":
+      case "teacher_course":
         promises.push(prisma.teacherCourse.createMany({ data: relationJson }));
         break;
-      case "user-course":
+      case "user_course":
         promises.push(prisma.userCourse.createMany({ data: relationJson }));
         break;
     }
