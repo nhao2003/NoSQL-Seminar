@@ -4,6 +4,12 @@ const getAllSchools = require("./sql/getAllSchools");
 const ListAllCoursesASpecificUserIsEnrolledInJS = require("./sql/listAllCoursesASpecificUserIsEnrolledIn.js");
 const getUsersWhoEnrolledInASpecificCourseDuringAGivenTimeRange = require("./sql/getUsersWhoEnrolledInASpecificCourseDuringAGivenTimeRange");
 const getAllTeachersForAParticularCourse = require("./sql/getAllTeachersForAParticularCourse.js");
+const findTheMostPopularCourseWithinASpecificSchool = require("./sql/findTheMostPopularCourseWithinASpecificSchool.js");
+const findMonthlyEnrollmentTrendsOverAYear = require("./sql/findMonthlyEnrollmentTrendsOverAYear.js");
+const getTop5MostEnrolledCoursesDuringTheCurrentMonth = require("./sql/getTop5MostEnrolledCoursesDuringTheCurrentMonth.js");
+const getTheCountOfCoursesASpecificTeacherTeach = require("./sql/getTheCountOfCoursesASpecificTeacherTeach.js");
+const addASpecificCourseToAUserEnrollmentList = require("./sql/addASpecificCourseToAUserEnrollmentList.js");
+const getAllCoursesOfferedByAParticularSchool = require("./sql/getAllCoursesOfferedByAParticularSchool.js");
 
 const prisma = new PrismaClient();
 async function main() {
@@ -57,78 +63,51 @@ async function main() {
 
   // // 5. Get all courses offered by a particular school
   // const schoolId = "S_ACCA";
-  // const courses = await prisma.schoolCourse.findMany({
-  //   where: { school_id: schoolId },
-  //   select: { Course: true },
-  // });
-  // console.log("Courses:", courses);
+  // const result5 = await getAllCoursesOfferedByAParticularSchool(
+  //   prisma,
+  //   schoolId
+  // );
+  // console.log({ result5 });
 
   // // 6. Add a specific course to a user's enrollment list
   // const userId = "U_10000060";
   // const courseId = "C_course-v1:ACCA+FA1_X_en+2019_T1";
-  // const user = await prisma.user.update({
-  //   where: { id: userId },
-  //   data: {
-  //     UserCourse: {
-  //       create: {
-  //         course_id: courseId,
-  //         enroll_time: new Date(),
-  //       },
-  //     },
-  //   },
-  // });
-  // console.log("User:", user);
+  // const result6 = await addASpecificCourseToAUserEnrollmentList(
+  //   prisma,
+  //   userId,
+  //   courseId
+  // );
+  // console.log({ result6 });
 
   // // 7. Get the count of courses a specific teacher teach
   // const teacherId = "T_于歆杰";
-  // const courseCount = await prisma.teacherCourse.count({
-  //   where: { teacher_id: teacherId },
-  // });
-  // console.log("Course Count:", courseCount);
+  // const result7 = await getTheCountOfCoursesASpecificTeacherTeach(
+  //   prisma,
+  //   teacherId
+  // );
+  // console.log({ result7 });
 
   // // 8. Get top 5 most enrolled courses during the current month
   // const month = 7;
   // const year = 2019;
-  // const topCourses = await prisma.$queryRaw`SELECT
-  // course_id,
-  // COUNT(*) AS enrollment_count
-  // FROM user_course
-  // JOIN courses ON user_course.course_id = courses._id
-  // WHERE
-  //   EXTRACT(MONTH FROM enroll_time) = ${month} AND
-  //   EXTRACT(YEAR FROM enroll_time) = ${year}
-  // GROUP BY course_id
-  // ORDER BY enrollment_count DESC LIMIT 5`;
+  // const result8 = await getTop5MostEnrolledCoursesDuringTheCurrentMonth(
+  //   prisma,
+  //   month,
+  //   year
+  // );
 
-  // console.log("Top Courses:", topCourses);
+  // console.log({ res: result8.data });
 
   // // 9. Find the most popular course within a specific school
-  // const results = await prisma.$queryRaw`
-  // SELECT
-  //   sc.course_id,
-  //   c.name AS course_name,
-  //   COUNT(*) AS enrollment_count
-  // FROM school_course sc
-  // JOIN courses c ON sc.course_id = c._id
-  // JOIN user_course uc ON sc.course_id = uc.course_id
-  // WHERE sc.school_id = 'S_ACCA'
-  // GROUP BY sc.course_id, c.name
-  // ORDER BY enrollment_count DESC
-  // LIMIT 1
-  // `;
-  // console.log("Monthly Enrollment Trends:", results);
+  // const result9 = await findTheMostPopularCourseWithinASpecificSchool(
+  //   prisma,
+  //   "S_ACCA"
+  // );
+  // console.log({ result9 });
 
   // // 10. Find Monthly enrollment trends over a year
-  // const monthlyEnrollmentTrends = await prisma.$queryRaw`
-  // SELECT
-  //   EXTRACT(MONTH FROM enroll_time) AS month,
-  //   COUNT(*) AS enrollment_count
-  // FROM user_course
-  // WHERE EXTRACT(YEAR FROM enroll_time) = 2019
-  // GROUP BY month
-  // ORDER BY month
-  // `;
-  // console.log("Monthly Enrollment Trends:", monthlyEnrollmentTrends);
+  // const result10 = await findMonthlyEnrollmentTrendsOverAYear(prisma, 2019);
+  // console.log({ result10 });
 
   await prisma.$disconnect();
 }
