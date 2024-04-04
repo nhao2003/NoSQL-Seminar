@@ -5,11 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "import": "node ./import/import-nosql.js && node ./import/import-sql.js",
+    "import": "node ./import/import.js",
     "import:nosql": "node ./import/import-nosql.js",
     "import:sql": "node ./import/import-sql.js",
-    "start": "node ./src/index.js",
-    "temp": "node ./src/temp.js"
+    "start": "node ./src/index.js"
   },
   "author": "",
   "license": "ISC",
