@@ -7,6 +7,59 @@ const mongoDemo = require("./mongo");
 const client = new MongoClient(url);
 const prisma = new PrismaClient();
 const db = client.db(dbName);
+
+async function compareCountTeachersPerSchool() {
+  const start = new Date();
+  const postgreSQL = await prisma.$queryRaw`SELECT school_id, COUNT(teacher_id) FROM school_teacher GROUP BY school_id;`;
+  const end = new Date();
+  const mongoStart = new Date();
+  const mongodb = await db.collection("school_teacher").aggregate([
+    {
+      $group: {
+        _id: "$school_id",
+        count: { $sum: 1 },
+      },
+    },
+  ]).toArray();
+  const mongoEnd = new Date();
+  console.table(postgreSQL);
+  console.table(mongodb);
+  return {
+    Task: "Count teachers per school",
+    PostgreSQL: end - start + " ms",
+    Mongodb: mongoEnd - mongoStart + " ms",
+  };
+}
+
+const compaGetAllUserCourse = async () => {
+  const start = new Date();
+  const postgreSQL = await prisma.$queryRaw`SELECT * FROM user_course;`;
+  const end = new Date();
+  const mongoStart = new Date();
+  const mongodb = await db.collection("user_course").find().toArray();
+  const mongoEnd = new Date();
+  return {
+    Task: "Get all user course",
+    PostgreSQL: end - start + " ms",
+    Mongodb: mongoEnd - mongoStart + " ms",
+  };
+}
+
+const compareAllCourseOfAUser = async () => {
+  const user_id = 'U_9330112';
+  const start = new Date();
+  const postgreSQL = await prisma.$queryRaw`SELECT  course_id FROM user_course WHERE user_id = ${user_id};`;
+  const end = new Date();
+  const mongoStart = new Date();
+  const mongodb = await db.collection("user_course").find({ user_id }).toArray();
+  const mongoEnd = new Date();
+  return {
+    Task: "Get all courses of a user",
+    PostgreSQL: end - start + " ms",
+    Mongodb: mongoEnd - mongoStart + " ms",
+  };
+}
+
 async function compareGetAllSchools() {
   const postgreSQL = await sqlDemo.getAllSchools(prisma);
   const mongodb = await mongoDemo.getAllSchools(db);
@@ -56,7 +109,7 @@ async function compareGetUsersWhoEnrolledInASpecificCourseDuringAGivenTimeRange(
 }
 
 async function compareGetAllTeachersForAParticularCourse() {
-  const courseId = "C_10000001";
+  const courseId = "C_course-v1:SPI+20170828001x+sp";
   const postgreSQL = await sqlDemo.getAllTeachersForAParticularCourse(
     prisma,
     courseId
@@ -143,19 +196,23 @@ async function main() {
   await client.connect();
   await prisma.$connect();
 
-  console.log("Connected successfully to server");
-  const arr = await Promise.all([
-    await compareGetAllSchools(),
-    await compareListAllCoursesASpecificUserIsEnrolledInJS(),
-    await compareGetUsersWhoEnrolledInASpecificCourseDuringAGivenTimeRange(),
-    await compareGetAllTeachersForAParticularCourse(),
-    await compareFindTheMostPopularCourseWithinASpecificSchool(),
-    await compareFindMonthlyEnrollmentTrendsOverAYear(),
-    await compareGetTop5MostEnrolledCoursesDuringTheCurrentMonth(),
-    await compareGetTheCountOfCoursesASpecificTeacherTeach(),
-    await compareGetAllCoursesOfferedByAParticularSchool(),
-  ]);
-  console.table(arr);
+  // console.log("Connected successfully to server");
+  // const arr = await Promise.all([
+  //   await compareGetAllSchools(),
+  //   await compareListAllCoursesASpecificUserIsEnrolledInJS(),
+  //   await compareGetUsersWhoEnrolledInASpecificCourseDuringAGivenTimeRange(),
+  //   await compareGetAllTeachersForAParticularCourse(),
+  //   await compareFindTheMostPopularCourseWithinASpecificSchool(),
+  //   await compareFindMonthlyEnrollmentTrendsOverAYear(),
+  //   await compareGetTop5MostEnrolledCoursesDuringTheCurrentMonth(),
+  //   await compareGetTheCountOfCoursesASpecificTeacherTeach(),
+  //   await compareGetAllCoursesOfferedByAParticularSchool(),
+  // ]);
+  // console.table(arr);
+  const countTeachersPerSchool = await compareAllCourseOfAUser();
+  const getAllUserCourse = await compaGetAllUserCourse();
+  console.table(countTeachersPerSchool);
+  console.table(getAllUserCourse);
   await client.close();
   await prisma.$disconnect();
 }
