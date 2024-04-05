@@ -133,7 +133,7 @@ const getUserInSpecificCourse = async (db, courseId, startDate, endDate) => {
       .aggregate([
         {
           $match: {
-            course_id: "C_course-v1:ACCA+FA1_X_en+2019_T1",
+            course_id: courseId,
             enroll_time: {
               $gte: new Date(startDate),
               $lte: new Date(endDate),
@@ -172,6 +172,9 @@ const getUserInSpecificCourse = async (db, courseId, startDate, endDate) => {
           $project: {
             _id: 1,
             name: 1,
+            enroll_time: 1,
+            user_id: 1,
+            course_id: 1,
           },
         },
       ])
@@ -377,9 +380,7 @@ const get5MostEnrolledCourses = async (db, month, year) => {
                 {
                   $eq: [
                     {
-                      $month: {
-                        $toDate: "$enroll_time",
-                      },
+                      $month: "$enroll_time"
                     },
                     month,
                   ],
@@ -387,9 +388,7 @@ const get5MostEnrolledCourses = async (db, month, year) => {
                 {
                   $eq: [
                     {
-                      $year: {
-                        $toDate: "$enroll_time",
-                      },
+                      $year: "$enroll_time",
                     },
                     year,
                   ],
@@ -512,18 +511,26 @@ const getTheMostPopularCourseOfSchool = async (db, schoolId) => {
   }
 };
 //Find Monthly enrollment trends over a year
-const findMonthlyEnrollmentTrends = async (db) => {
+const findMonthlyEnrollmentTrends = async (db, year) => {
   try {
     const start = new Date();
     const monthlyEnrollments = await db
       .collection("user_course")
       .aggregate([
         {
+          $match: {
+            $expr: {
+              $eq: [
+                { $year: "$enroll_time" },
+                year,
+              ],
+            },
+          },
+        },
+        {
           $group: {
             _id: {
-              $month: {
-                $toDate: "$enroll_time",
-              },
+              $month: "$enroll_time",
             },
             count: { $sum: 1 },
           },
