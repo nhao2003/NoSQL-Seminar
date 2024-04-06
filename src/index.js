@@ -215,10 +215,57 @@ async function compareGetAllCoursesOfferedByAParticularSchool() {
   };
 }
 
+async function getCountStudenOfEachTeacher() {
+  const res = await Promise.all([
+    benchmark(async () => {
+      return await prisma.$queryRaw`SELECT _id, name, about, COUNT(user_id) FROM teachers JOIN teacher_course ON teachers._id = teacher_course.teacher_id JOIN user_course ON teacher_course.course_id = user_course.course_id GROUP BY _id, name, about;`;
+    }
+    ),
+    benchmark(async () => {
+      return await db.collection("teachers").aggregate([
+        {
+          $lookup: {
+            from: "teacher_course",
+            localField: "_id",
+            foreignField: "teacher_id",
+            as: "teacher_course",
+          },
+        },
+        {
+          $unwind: "$teacher_course",
+        },
+        {
+          $lookup: {
+            from: "user_course",
+            localField: "teacher_course.course_id",
+            foreignField: "course_id",
+            as: "user_course",
+          },
+        },
+        {
+          $group: {
+            _id: "$_id",
+            name: { $first: "$name" },
+            about: { $first: "$about" },
+            count: { $sum: 1 },
+          },
+        },
+      ]).toArray();
+    }
+    ),
+  ]);
+  // console.log(res[0].time, res[1].time);
+  // console.log(res[0].data.length, res[1].data.length);
+  return {
+    Task: "Get count student of each teacher",
+    PostgreSQL: res[0].time,
+    Mongodb: res[1].time,
+  };
+}
 async function test() {
   const arr = await Promise.all([
     await compareAllCourseOfAUser(),
-    // await compaCountAllUserCourseEnroll(),
+    await compaCountAllUserCourseEnroll(),
     await compareGetAllSchools(),
     await compareListAllCoursesASpecificUserIsEnrolledInJS(),
     await compareGetUsersWhoEnrolledInASpecificCourseDuringAGivenTimeRange(),
@@ -228,6 +275,7 @@ async function test() {
     await compareGetTop5MostEnrolledCoursesDuringTheCurrentMonth(),
     await compareGetTheCountOfCoursesASpecificTeacherTeach(),
     await compareGetAllCoursesOfferedByAParticularSchool(),
+    await getCountStudenOfEachTeacher(),
   ]);
   return arr;
 }
@@ -280,32 +328,3 @@ main().catch((e) => {
   console.error(e);
   process.exit(1);
 });
-
-// async function test() {
-//   await client.connect();
-//   await prisma.$connect();
-//   const start = new Date();
-//   // Find user_course has enroll_time between 2019 and 2020
-//   const res =
-//     await prisma.$queryRaw`SELECT * FROM user_course WHERE enroll_time BETWEEN '2018-01-01' AND '2020-12-31' AND user_id = 'U_9538387';`;
-//   const end = new Date();
-//   console.log("PostgreSQL", end - start + " ms");
-//   const mongoStart = new Date();
-//   // Find user_course has enroll_time between 2019 and 2020
-//   const mongodb = await db
-//     .collection("user_course")
-//     .find({ enroll_time: { $gte: "2018-01-01", $lt: "2021-01-01" }, user_id: "U_9538387" })
-//     .toArray();
-//   const mongoEnd = new Date();
-//   console.log("Mongodb", mongoEnd - mongoStart + " ms");
-
-//   console.log("PostgreSQL", res.length);
-//   console.log("Mongodb", mongodb.length);
-//   await client.close();
-//   await prisma.$disconnect();
-// }
-
-// test().catch((e) => {
-//   console.error(e);
-//   process.exit(1);
-// });
